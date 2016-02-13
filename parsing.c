@@ -35,10 +35,10 @@ typedef struct {
 } lval;
 
 /* Create Enumeration of Possible lval Types */
-enum { LVAL_NUM, LVAL_ERR };
+enum LValTypes { LVAL_NUM, LVAL_ERR };
 
 /* Create Enumeration of Possible Error Types */
-enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
+enum ErrorTypes { LERR_DIV_ZERO, LERR_MOD_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
 
 /* Create a new number type lval */
 lval lval_num(long x) {
@@ -70,6 +70,11 @@ lval eval_op(lval x, char* op, lval y) {
     return y.num == 0
       ? lval_err(LERR_DIV_ZERO)
       : lval_num(x.num / y.num);
+  }
+  if (strcmp(op, "%") == 0) { 
+    return y.num == 0
+      ? lval_err(LERR_MOD_ZERO)
+      : lval_num(x.num % y.num);
   }
   return lval_err(LERR_BAD_OP);
 }
@@ -110,6 +115,9 @@ void lval_print(lval v) {
       if (v.err == LERR_DIV_ZERO) {
         printf("Error: Division By Zero!");
       }
+      if (v.err == LERR_MOD_ZERO) {
+        printf("Error: Modulo By Zero!");
+      }
       if (v.err == LERR_BAD_OP)   {
         printf("Error: Invalid Operator!");
       }
@@ -135,7 +143,7 @@ int main(int argc, char** argv) {
   mpca_lang(MPCA_LANG_DEFAULT,
             "                                                   \
     number   : /-?[0-9]+/ ;                             \
-    operator : '+' | '-' | '*' | '/' ;                  \
+    operator : '+' | '-' | '*' | '/' | '%';             \
     expr     : <number> | '(' <operator> <expr>+ ')' ;  \
     lispy    : /^/ <operator> <expr>+ /$/ ;             \
     ",
