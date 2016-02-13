@@ -26,17 +26,6 @@ void add_history(char* unused) {}
 #include <editline/readline.h>
 #endif
 
-int number_of_nodes(mpc_ast_t* t) {
-  if (t->children_num == 0) { return 1; }
-  if (t->children_num >= 1) {
-    int total = 1;
-    for (int i = 0; i < t->children_num; i++) {
-      total = total + number_of_nodes(t->children[i]);
-    }
-    return total;
-  }
-}
-
 /* Use operator string to see which operation to perform */
 long eval_op(long x, char* op, long y) {
   if (strcmp(op, "+") == 0) { return x + y; }
@@ -104,25 +93,8 @@ int main(int argc, char** argv) {
     /* Attempt to Parse the user Input */
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, Lispy, &r)) {
-      /* On Success Print the AST */
-      mpc_ast_print(r.output);
-
-      /* Load AST from output */
-      mpc_ast_t* a = r.output;
-      printf("Tag: %s\n", a->tag);
-      printf("Contents: %s\n", a->contents);
-      printf("Number of nodes: %i\n", number_of_nodes(a));
-      printf("Number of children: %i\n", a->children_num);
-
-      /* Get First Child */
-      mpc_ast_t* c0 = a->children[0];
-
-      printf("First Child Tag: %s\n", c0->tag);
-      printf("First Child Contents: %s\n", c0->contents);
-      printf("First Child Number of children: %i\n",
-             c0->children_num);
-
-
+      long result = eval(r.output);
+      printf("%li\n", result);
       mpc_ast_delete(r.output);
     } else {
       /* Otherwise Print the Error */
